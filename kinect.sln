@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{B9CFCE02-9C10-1C22-BAC2-5B5EE74C99E8}") = "kinect", "Assembly-CSharp.csproj", "{A0F07A8E-28BC-7567-9406-59C61E001BF7}"
+EndProject
+Project("{B9CFCE02-9C10-1C22-BAC2-5B5EE74C99E8}") = "kinect", "Assembly-CSharp-Editor.csproj", "{99F356DC-A0B3-814E-BBE9-8F5DDECE8B59}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0F07A8E-28BC-7567-9406-59C61E001BF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0F07A8E-28BC-7567-9406-59C61E001BF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0F07A8E-28BC-7567-9406-59C61E001BF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0F07A8E-28BC-7567-9406-59C61E001BF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99F356DC-A0B3-814E-BBE9-8F5DDECE8B59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99F356DC-A0B3-814E-BBE9-8F5DDECE8B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99F356DC-A0B3-814E-BBE9-8F5DDECE8B59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99F356DC-A0B3-814E-BBE9-8F5DDECE8B59}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
