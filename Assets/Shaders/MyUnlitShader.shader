@@ -54,16 +54,16 @@
     		// Object gets instantiated and passed into the vertex shader method.
     		struct appdata
 			{
-				float4 vertex : POSITION;
-				float2 uv : TEXCOORD0;
+				float4 vertex : POSITION; // position in model space
+				float2 uv : TEXCOORD0;    // position 0-1 xy in texture space
 			};
 
     		// Represents a class that gets instantiated in the vertex shader, populated 
     		// and then passed as the input into the fragment shader
 		    struct v2f {
-          		float4 pos : SV_POSITION; // position of vertex on screen
+          		float4 pos : SV_POSITION;   // position of vertex on screen
           		float2 uv : TEXCOORD0;		// 0-1 xy equivalent on texture
-          		fixed4 color : COLOR;		// don't know if this is actually required?!
+          		fixed4 color : COLOR;		
 
       		};
 
@@ -80,23 +80,20 @@
 				float scale = (_MAX_KINECT_VALUE-_MIN_KINECT_VALUE) / 255.0;
    		        float4 height = float4(1-depth.r,0,0,0);
    		        // sample the colorTexture (land sea colour scheme)
-   		        o.color =  tex2Dlod(_ColorTex, height);
-
+   		        o.color = tex2Dlod(_ColorTex, height);
 
    		        // change the vertex 
-
-
-   		       	v.vertex.y = height * scale *10;
+   		        v.vertex.y = height * scale * 20;
 		        // magically transfers the 3d verteces to the 2d display
 		        o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-
-
-
-   		        o.uv = scale * v.uv * height; //scale; /// scale; 
-   		        //o.color =  heightInverse;
+		        o.uv = scale * v.uv * height; //scale; /// scale; 
 
 		        return o;
 		    }
+
+
+
+
 
 		    // The fragment shader - handles the color of vertex
 		    fixed4 frag (v2f i) : SV_Target { 
