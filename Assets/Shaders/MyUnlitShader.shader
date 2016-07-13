@@ -15,6 +15,15 @@
 		_MAX_KINECT_VALUE ("top of kinect range", int) = 1
 		_MIN_KINECT_VALUE ("bottom of kinect range", int) = 0
 
+
+//		matrix MirroredIdentity = {
+//			    { 0, 0, 0, 1 },
+//			    { 0, 0, 1, 0 },
+//			    { 0, 1, 0, 0 },
+// 			    { 1, 0, 0, 0 }
+//			};
+
+
 	}
 
 	SubShader
@@ -74,19 +83,26 @@
 
 				// get the value of the texture (depthtex) that corresponds to the texture position (v.uv)
 				// v.uv vals are from 0-1.
+				v.uv[1] = abs(1-v.uv[1]);
 		        float4 pos = float4(v.uv, 0.0, 0.0); // changing v.uv to v.vertex.xz splits the image
-   		        float4 depth = tex2Dlod(_DepthTex, pos); 
+		        float4 depth = tex2Dlod(_DepthTex, pos); 
+
    		        // this rescales the texture value
 				float scale = (_MAX_KINECT_VALUE-_MIN_KINECT_VALUE) / 255.0;
    		        float4 height = float4(1-depth.r,0,0,0);
+
+
+
+   		        // change the vertex height based on the color
+   		        v.vertex.y = height * scale * 20;
+   		        //v.vertex.x = abs(1-v.vertex.x) - 1					;
+   		        //v.vertex.z = abs(1-v.vertex.z) - 1					;
+
    		        // sample the colorTexture (land sea colour scheme)
    		        o.color = tex2Dlod(_ColorTex, height);
-
-   		        // change the vertex 
-   		        v.vertex.y = height * scale * 20;
 		        // magically transfers the 3d verteces to the 2d display
 		        o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-		        o.uv = scale * v.uv * height; //scale; /// scale; 
+
 
 		        return o;
 		    }

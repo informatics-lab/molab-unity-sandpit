@@ -107,13 +107,8 @@ public class MyKinect : MonoBehaviour
 	private void HandleKinectDepthCameraDataReceived (object sender, BaseCamera. DataReceivedEventArgs e)
 	{
 
-		// Flip axis to correct for mirroring image
-		byte [] kinectData = new byte[e.Data.Data.Length]; 
-		kinectData = FlipImage (e.Data.Data);
-
 		// initialise empty color object
 		Color32[] colorsSM  = new Color32 [kinectWidth * kinectHeight];
-
 		Debug.Log ("counter :" + counter);
 
 		// counter is set as global variable = 0.
@@ -121,26 +116,31 @@ public class MyKinect : MonoBehaviour
 
 			// loop through the byte array and convert elements to ushort to put in ushort array
 			//Add together the elements from each iteration until the if statment condition is met.
-			for (int i = 0; i < colorsSM.Length; i++) {				
-				KinectSA [i]  +=  BitConverter.ToUInt16(kinectData, i * 2);
-			} // ENDFOR
-
+			for (int i = 0; i < colorsSM.Length; i++) {
+				KinectSA [i]  +=  BitConverter.ToUInt16(e.Data.Data, i * 2);
+			} 
+			// ENDFOR
 			counter += 1;
 
 		} else {
 
 			// loop through the ushort array and replace elements with average.
-			for (int i = 0; i < colorsSM.Length; i++) {					
+			for (int i = 0; i < colorsSM.Length; i++) {	
+
+				// Divide by number of times the images were added together (to get mean)
 				KinectSA [i] = (ushort) ( ( (int) KinectSA [i] ) / (counter - 1) );
+				// Convert back to byte Array
 				KinectBA [i * 2] = (byte) KinectSA [i];
+
 			} // ENDFOR
 
 			// restart the counter 
 			counter = 0;
 
-			// convert the byte array into a color32 texture
-			// and set as depth texture for the shader.
-			colorsSM = Byte2Color (colorsSM, KinectSA, KinectBA);
+			// Flip axis to correct for mirroring image
+			//KinectBA = FlipImage (KinectBA);
+			// convert the byte array into a color32 texture and set as depth texture for the shader.
+			colorsSM = Byte2Color (colorsSM, KinectBA);
 			depthTexture.SetPixels32 (colorsSM);
 			depthTexture.filterMode = FilterMode.Bilinear;
 			depthTexture.Apply();
@@ -152,7 +152,7 @@ public class MyKinect : MonoBehaviour
 
 
 
-	Color32 [] Byte2Color( Color32 [] ColorsSM, ushort [] KinectSA, byte [] KinectBA ) {
+	Color32 [] Byte2Color( Color32 [] ColorsSM, byte [] KinectBA ) {
 
 			//looping over each integer(pixel value in the array)
 			// i is the index of that value in the byte array
@@ -160,7 +160,6 @@ public class MyKinect : MonoBehaviour
 
 				// value of pixel
 				ushort s = BitConverter.ToUInt16 (KinectBA, i * 2);
-				//ushort s = KinectSA[i] ;
 
 				// if the value of that integer is 2047 i.e. the returned error value
 				if (s <= 100 || s >= 2047) {
@@ -248,26 +247,31 @@ public class MyKinect : MonoBehaviour
 		// Initialise empty byte arrays to take
 		// The completely reversed image
 		// The rows subset to reverse iteratively
-		byte [] RevdByteArray = new byte [ByteArray.Length];
-		byte [] ByteRow = new byte [kinectWidth * 2]; 
+		//byte [] RevdByteArray = new byte [ByteArray.Length];
+		//byte [] ByteRow       = new byte [kinectWidth * 2]; 
+
+		//Debug.Log ("ByteArray [319] : " + ByteArray [319]);
 
 		// For each row of the image
-		for ( int i = 0; i < ByteArray.Length; i += (i * kinectHeight * 2) ) {
+		//for ( int i = 0; i < ByteArray.Length; i = (i * kinectHeight * 2) ) {
 		
-			// Copy the  image row into a new array
+			// Copy the image row into a new array
 			// Source array, start index, destination array, start index, length)
-			Array.Copy(ByteArray, i, ByteRow, 0, (kinectWidth * 2));
-//			// Reverse the new array
-//			Array.Reverse(ByteRow);
-//			// Copy reversed image row into the empty reversed array
-//			Array.Copy(ByteRow, 0, RevdByteArray, i, (kinectWidth * 2));
-				
-		}// ENDFOR
+			//Array.Copy(ByteArray, (i * kinectHeight * 2), ByteRow, 0, (kinectWidth * 2));
+			//var ByteRow = new ArraySegment<byte>(ByteArray, i, (kinectWidth * 2));
 
-		Debug.Log (ByteRow);
+			// Reverse the new array
+			//Array.Reverse(ByteRow.Array);
 
 
-		return RevdByteArray;
+			//if (i == 0) {Debug.Log ("reversed ByteRow [321] : " + ByteRow.Array [321]);}
+
+			// Copy reversed image row into the empty reversed array
+			//Array.Copy(ByteRow.Array, 0, RevdByteArray, i, (kinectWidth * 2));
+
+		//}// ENDFOR
+			
+		return ByteArray;
 
 	}//ENDFUNCTION
 
@@ -308,6 +312,10 @@ public class MyKinect : MonoBehaviour
 
 		// Should now have a filter collection table (array) of values and 
 		//frequencies from the FilterSquare table and a count of the number of bad pixels (N2047s)
+
+		//want something to say if all values in filter collection are 2047 then null the point
+
+
 
 		// Assign returned value
 		int? svalue = 500;
