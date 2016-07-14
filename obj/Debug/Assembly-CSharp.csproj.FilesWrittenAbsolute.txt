@@ -49,3 +49,5 @@
 /Users/mike/Documents/molab-sandpit/molab-unity-sandpit/Temp/bin/Debug/Mono.Cecil.Mdb.dll
 /Users/mike/Documents/molab-sandpit/molab-unity-sandpit/Temp/bin/Debug/Assembly-CSharp.dll.mdb
 /Users/mike/Documents/molab-sandpit/molab-unity-sandpit/Temp/bin/Debug/Assembly-CSharp.dll
+/Users/mike/Documents/molab-sandpit/molab-unity-sandpit/Temp/bin/Debug/Assets/Shaders/MyUnlitShader.shader
+/Users/mike/Documents/molab-sandpit/molab-unity-sandpit/Temp/bin/Debug/Assets/Shaders/MyGridUnlitShader.shader

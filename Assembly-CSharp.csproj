@@ -66,6 +66,8 @@
      <Compile Include="Assets\Scripts\libfreenect\wrappers\csharp\src\lib\SwapBufferCollection.cs" />
      <Compile Include="Assets\Scripts\libfreenect\wrappers\csharp\src\lib\VideoCamera.cs" />
      <Compile Include="Assets\Scripts\libfreenect\wrappers\csharp\src\lib\VideoFrameMode.cs" />
+     <None Include="Assets\wtf.shader" />
+     <None Include="Assets\Shaders\MyUnlitGridShader.shader" />
      <None Include="Assets\HeightMapTerrainShader.shader" />
      <None Include="Assets\Shaders\MyUnlitShader.shader" />
      <None Include="Assets\Shaders\MyShader.shader" />

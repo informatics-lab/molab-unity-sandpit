@@ -24,8 +24,20 @@ public class MyKinect : MonoBehaviour
 
 	public Texture2D depthTexture;
 
-	public GameObject terrain; //this is actually a 'Plane' object
-	public Material terrainMaterial;
+	public GameObject terrain1; //this is actually a 'Plane' object
+	public GameObject terrain2;
+	public GameObject terrain3;
+	public GameObject terrain4;
+	public GameObject terrain5;
+	public GameObject terrain6;
+
+	public Material terrain1Material;
+	public Material terrain2Material;
+	public Material terrain3Material;
+	public Material terrain4Material;
+	public Material terrain5Material;
+	public Material terrain6Material;
+
 	public Shader terrainMaterialShader;
 	public RenderTexture renderTexture;
 
@@ -74,19 +86,35 @@ public class MyKinect : MonoBehaviour
 			depthTexture = new Texture2D (kinectWidth, kinectHeight, TextureFormat.ARGB32, false);
 			//renderTexture = new RenderTexture (kinectWidth, kinectHeight, 0, RenderTextureFormat.R,RenderTextureReadWrite.Linear);
 
-			terrain = GameObject.Find ("Terrain");
-			terrainWidth  = (kinectWidth  / 10) - 1;
-			terrainHeight = (kinectHeight / 10) - 1;
-			terrain.transform.localScale = new Vector3 (terrainWidth, 1, terrainHeight);
+//			terrain = GameObject.Find ("Terrain");
+//			terrainWidth  = (kinectWidth  / 10) - 1;
+//			terrainHeight = (kinectHeight / 10) - 1;
+//			terrain.transform.localScale = new Vector3 (terrainWidth, 1, terrainHeight);
 
-			terrainMaterial = terrain.GetComponent<Renderer>().material;
-			terrainMaterial.SetFloat ("_DepthTexWidth", kinectWidth);
-			terrainMaterial.SetFloat ("_DepthTexHeight", kinectHeight);
-			terrainMaterialShader = terrainMaterial.shader;
+			terrain1Material = terrain1.GetComponent<Renderer>().material;
+			terrain2Material = terrain2.GetComponent<Renderer>().material;
+			terrain3Material = terrain3.GetComponent<Renderer>().material;
+			terrain4Material = terrain4.GetComponent<Renderer>().material;
+			terrain5Material = terrain5.GetComponent<Renderer>().material;
+			terrain6Material = terrain6.GetComponent<Renderer>().material;
 
-			terrainMaterial.SetFloat ("_DepthTexHeight", kinectHeight);
-			terrainMaterial.SetInt ("_MAX_KINECT_VALUE", MAX_KINECT_VALUE);
-			terrainMaterial.SetInt ("_MIN_KINECT_VALUE", MIN_KINECT_VALUE);
+//			terrainMaterial.SetFloat ("_DepthTexWidth", kinectWidth);
+//			terrainMaterial.SetFloat ("_DepthTexHeight", kinectHeight);
+//			terrainMaterialShader = terrainMaterial.shader;
+//			terrainMaterial.SetFloat ("_DepthTexHeight", kinectHeight);
+
+			terrain1Material.SetInt ("_Grid_x_Index", 0);
+			terrain1Material.SetInt ("_Grid_z_Index", 0);
+			terrain2Material.SetInt ("_Grid_x_Index", 1);
+			terrain2Material.SetInt ("_Grid_z_Index", 0);
+			terrain3Material.SetInt ("_Grid_x_Index", 2);
+			terrain3Material.SetInt ("_Grid_z_Index", 0);
+			terrain4Material.SetInt ("_Grid_x_Index", 0);
+			terrain4Material.SetInt ("_Grid_z_Index", 1);
+			terrain5Material.SetInt ("_Grid_x_Index", 1);
+			terrain5Material.SetInt ("_Grid_z_Index", 1);
+			terrain6Material.SetInt ("_Grid_x_Index", 2);
+			terrain6Material.SetInt ("_Grid_z_Index", 1);
 
 		} else {
 			throw new Exception ("Could not initialise kinect as no devices were found.");
@@ -144,7 +172,12 @@ public class MyKinect : MonoBehaviour
 			depthTexture.SetPixels32 (colorsSM);
 			depthTexture.filterMode = FilterMode.Bilinear;
 			depthTexture.Apply();
-			terrainMaterial.SetTexture ("_DepthTex", depthTexture);
+			terrain1Material.SetTexture ("_DepthTex", depthTexture);
+			terrain2Material.SetTexture ("_DepthTex", depthTexture);
+			terrain3Material.SetTexture ("_DepthTex", depthTexture);
+			terrain4Material.SetTexture ("_DepthTex", depthTexture);
+			terrain5Material.SetTexture ("_DepthTex", depthTexture);
+			terrain6Material.SetTexture ("_DepthTex", depthTexture);
 
 		} // ENDELSEIF
 
@@ -153,6 +186,9 @@ public class MyKinect : MonoBehaviour
 
 
 	Color32 [] Byte2Color( Color32 [] ColorsSM, byte [] KinectBA ) {
+			// Also preps data for filtering
+
+
 
 			//looping over each integer(pixel value in the array)
 			// i is the index of that value in the byte array
@@ -162,7 +198,7 @@ public class MyKinect : MonoBehaviour
 				ushort s = BitConverter.ToUInt16 (KinectBA, i * 2);
 
 				// if the value of that integer is 2047 i.e. the returned error value
-				if (s <= 100 || s >= 2047) {
+				if (s >= 2047) {
 
 					// size of grid to look at filtering
 					int filterGrid = (int) Math.Pow (4, 2);

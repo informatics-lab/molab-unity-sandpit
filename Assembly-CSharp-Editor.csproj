@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Editor\CreatePlane.cs" />
+     <None Include="Assets\wtf.shader" />
+     <None Include="Assets\Shaders\MyUnlitGridShader.shader" />
      <None Include="Assets\HeightMapTerrainShader.shader" />
      <None Include="Assets\Shaders\MyUnlitShader.shader" />
      <None Include="Assets\Shaders\MyShader.shader" />
