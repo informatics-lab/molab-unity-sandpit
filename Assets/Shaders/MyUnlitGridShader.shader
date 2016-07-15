@@ -105,34 +105,29 @@
 				}
 				if ( _Grid_x_Index == 1 && _Grid_z_Index == 1){
 					v.uv[0] = 0.33333 + (v.uv[0] / 3);
-					v.uv[1] = 0.5 + (v.uv[1] / 2);
+					v.uv[1] = 0.5     + (v.uv[1] / 2);
 				}
 				if ( _Grid_x_Index == 2 && _Grid_z_Index == 1){
 					v.uv[0] = 0.66666 + (v.uv[0] / 3);
-					v.uv[1] = 0.5 + (v.uv[1] / 2);
+					v.uv[1] = 0.5     + (v.uv[1] / 2);
 				}
 
-		        float4 pos = float4(v.uv, 0.0, 0.0); // changing v.uv to v.vertex.xz splits the image
-		        float4 depth = tex2Dlod(_DepthTex, pos); 
+		        float4 depth  = tex2Dlod (_DepthTex, float4(v.uv, 0.0, 0.0)); 
+		        float4 height = float4 (1 - depth.r, 0, 0, 0);
 
-   		        // this rescales the texture value
-				float scale = (_MAX_KINECT_VALUE-_MIN_KINECT_VALUE) / 255.0;
-   		        float4 height = float4(1 - depth.r, 0, 0, 0);
+				// i.e. if the value sampled corresponds to the 2047 (transformed to a 0)
+   		        if ( depth.r  <= 0 ) {
+   		        	v.vertex.y = 0;
+   		        	o.color    = float4(0.73, 0.73, 0.35, 1.);
 
 
+   		        } else {
+   		           	v.vertex.y = height * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 100;// change the vertex height 
+					o.color = tex2Dlod(_ColorTex, height);  // sample the colorTexture (land sea colour scheme)
+				}
 
-
-   		        // change the vertex height based on the color
-   		        v.vertex.y = height * scale * 20;
-   		        //v.vertex.x = abs(1-v.vertex.x) - 1					;
-   		        //v.vertex.z = abs(1-v.vertex.z) - 1					;
-
-   		        // sample the colorTexture (land sea colour scheme)
-   		        o.color = tex2Dlod(_ColorTex, height);
-		        // magically transfers the 3d verteces to the 2d display
+   		        // magically transfers the 3d verteces to the 2d display
 		        o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-
-
 		        return o;
 		    }
 
