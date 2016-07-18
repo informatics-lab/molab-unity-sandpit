@@ -1,9 +1,9 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/MyKinect.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Shaders/MyUnlitGridShader.shader">
     <Files>
-      <File FileName="Assets/Scripts/MyKinect.cs" Line="140" Column="64" />
-      <File FileName="Assets/Shaders/MyUnlitGridShader.shader" Line="128" Column="45" />
+      <File FileName="Assets/Scripts/MyKinect.cs" Line="191" Column="75" />
+      <File FileName="Assets/Shaders/MyUnlitGridShader.shader" Line="121" Column="38" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -79,7 +79,6 @@ public class MyKinect : MonoBehaviour
 			kinect.Open ();
 
 			kinect.DepthCamera.DataReceived += HandleKinectDepthCameraDataReceived;
-//			kinect.DepthCamera.Mode = kinect.DepthCamera.Modes [5];
 
 			kinect.DepthCamera.Start ();
 			kinect.LED.Color = LEDColor.Red;
@@ -94,12 +93,6 @@ public class MyKinect : MonoBehaviour
 			Debug.Log ("kinect mode paddingbitsperpixel " + kinect.DepthCamera.Mode.PaddingBitsPerPixel);
 
 			depthTexture = new Texture2D (kinectWidth, kinectHeight, TextureFormat.ARGB32, false);
-			//renderTexture = new RenderTexture (kinectWidth, kinectHeight, 0, RenderTextureFormat.R,RenderTextureReadWrite.Linear);
-
-//			terrain = GameObject.Find ("Terrain");
-//			terrainWidth  = (kinectWidth  / 10) - 1;
-//			terrainHeight = (kinectHeight / 10) - 1;
-//			terrain.transform.localScale = new Vector3 (terrainWidth, 1, terrainHeight);
 
 			terrain1Material = terrain1.GetComponent<Renderer>().material;
 			terrain2Material = terrain2.GetComponent<Renderer>().material;
@@ -107,11 +100,6 @@ public class MyKinect : MonoBehaviour
 			terrain4Material = terrain4.GetComponent<Renderer>().material;
 			terrain5Material = terrain5.GetComponent<Renderer>().material;
 			terrain6Material = terrain6.GetComponent<Renderer>().material;
-
-//			terrainMaterial.SetFloat ("_DepthTexWidth", kinectWidth);
-//			terrainMaterial.SetFloat ("_DepthTexHeight", kinectHeight);
-//			terrainMaterialShader = terrainMaterial.shader;
-//			terrainMaterial.SetFloat ("_DepthTexHeight", kinectHeight);
 
 			terrain1Material.SetInt ("_Grid_x_Index", 0);
 			terrain1Material.SetInt ("_Grid_z_Index", 0);
@@ -157,39 +145,20 @@ public class MyKinect : MonoBehaviour
 			if (e.Data.Data[i] > mx) { mx = e.Data.Data [i]; }
 		}//ENDFOR
 
-		// counter is set as global variable = 0
-//		if (counter >= startsample && counter < stopsample) {
-
-
-			// loop through the byte array and convert elements to ushort to put in ushort array
-			//Add together the elements from each iteration until the if statment condition is met.
-//			for (int i = 0; i < colorsSM.Length; i++) {
-//				KinectSA [i] += BitConverter.ToUInt16(e.Data.Data, i * 2);
-//				KinectSA [i] = BitConverter.ToUInt16(e.Data.Data, i * 2);
-//			}
-//			counter += 1;
-
-
-//		} else if (counter == stopsample) {
-				
-
 			// convert the byte array into a color32 texture and set as depth texture for the shader.
 			// loop through the ushort array and replace elements with average.
 			for (int i = 0; i < colorsSM.Length; i++) {	
-				// Divide by number of times the images were added together (to get mean)
-//				KinectSA [i] = (ushort) ( ( (int) KinectSA [i] ) / (stopsample - startsample) );
-//				KinectBA [i * 2] = (byte) KinectSA [i]; // Convert back to byte Array
-//				KinectSA [i] = 0; // reset the Short Array
+
 				ushort s = BitConverter.ToUInt16 (e.Data.Data, i * 2);	//value of pixel
 
-
 				// Reset the pixel if its value lies outside the bounds of MAX_KINECT_VALUE
-				// and MIN_KINECT_VALUE + 5. 
+				// and MIN_KINECT_VALUE + something. 
 				// Any pixel returing the 2047 error value is set to MIN_KINECT_VALUE
 				// this unique value can then be picked up in the shader.
 				if (s > MAX_KINECT_VALUE && s != 2047) {s = MAX_KINECT_VALUE ;}
-				if (s <= MIN_KINECT_VALUE) {s = (ushort) ( (int) MIN_KINECT_VALUE + 10) ;}
-				if (s == 2047) {s = MIN_KINECT_VALUE;} 
+				if (s <= MIN_KINECT_VALUE) {s = (ushort) ( (int) MIN_KINECT_VALUE + 50) ;}
+
+				if (s < MIN_KINECT_VALUE + 50) {s = MIN_KINECT_VALUE;} 
 
 				Color32 color = new Color32 ();	// Take the colour, scale it and put it into a colour array.
 				double ScalingFactor = 255.0 / (MAX_KINECT_VALUE - MIN_KINECT_VALUE);
@@ -199,10 +168,10 @@ public class MyKinect : MonoBehaviour
 				color.g = 0;
 				color.r = (byte) (scaled);
 				colorsSM [i] = color;
+
 			} // ENDFOR
 
 			depthTexture.SetPixels32 (colorsSM);
-			//depthTexture.filterMode = FilterMode.Bilinear;
 			depthTexture.Apply();
 
 			terrain1Material.SetTexture ("_DepthTex", depthTexture);
@@ -211,13 +180,6 @@ public class MyKinect : MonoBehaviour
 			terrain4Material.SetTexture ("_DepthTex", depthTexture);
 			terrain5Material.SetTexture ("_DepthTex", depthTexture);
 			terrain6Material.SetTexture ("_DepthTex", depthTexture);
-
-			// restart the counter 
-//			counter = 0;
-
-//		} else {
-//			counter += 1;
-//		} // ENDELSEIF
 
 	} // ENDFUNCTION
 

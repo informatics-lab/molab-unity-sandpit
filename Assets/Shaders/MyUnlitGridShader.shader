@@ -14,12 +14,8 @@
 		_MAX_KINECT_VALUE ("top of kinect range", int) = 1
 		_MIN_KINECT_VALUE ("bottom of kinect range", int) = 0
 
-	  //  _Grid_x_Index ("start index of x coord on terrain grid", int) = 0
-      //  _Grid_z_Index ("start index of z coord on terrain grid", int) = 0
-
         _Grid_x_Index ("Grid x Index", int) = 3
 	    _Grid_z_Index ("Grid z Index", int) = 2
-
 
 	}
 
@@ -117,12 +113,9 @@
 
 				// i.e. if the value sampled corresponds to the 2047 (transformed to a 0)
    		        if ( depth.r  <= 0 ) {
-   		        	v.vertex.y = 0;
    		        	o.color    = float4(0.73, 0.73, 0.35, 1.);
-
-
    		        } else {
-   		           	v.vertex.y = height * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 100;// change the vertex height 
+   		           	v.vertex.y = height * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;// change the vertex height 
 					o.color = tex2Dlod(_ColorTex, height);  // sample the colorTexture (land sea colour scheme)
 				}
 
@@ -133,42 +126,11 @@
 
 
 
-
-
 		    // The fragment shader - handles the color of vertex
 		    fixed4 frag (v2f i) : SV_Target { 
 		       //	i.color = float4 ( tex2D (_ColorTex, i.uv).rgb, 1.0);
 		       	return i.color;
 		    }
-
-
-
-
-		    // SAVED VERSIONS!!!!
-      		// The vertex shader - handles the position of the vertex 
-//		    v2f vert(appdata v) {
-//		        v2f o;
-//		        o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-//		        float4 pos = float4(v.uv, 0.0, 0.0);
-//   		        float4 depthRGBA = tex2Dlod(_DepthTex, pos); 
-//			    int scale = 1 / ( 255 / (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) ) ; 
-//   		        float red = depthRGBA.r * scale;
-//   		        float4 height = float4(red,0,0,0);
-//   		        o.pos.y = o.pos.y * height/scale; /// scale; 
-//   		        float4 heightInverse = float4((1*scale)-red,0,0,0);
-//   		        //o.color =  heightInverse;
-//   		        o.color =  tex2Dlod(_ColorTex, heightInverse/scale);
-//
-//		        return o;
-//		    }
-//
-//		    // The fragment shader - handles the color of vertex
-//		    fixed4 frag (v2f i) : SV_Target { 
-//		       //	i.color = float4 ( tex2D (_ColorTex, i.uv).rgb, 1.0);
-//		       	return i.color;
-//		    }
-
-
 
 
 		    ENDCG
