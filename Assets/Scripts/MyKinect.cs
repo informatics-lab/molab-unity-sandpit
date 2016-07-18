@@ -5,9 +5,6 @@ using freenect;
 
 public class MyKinect : MonoBehaviour
 {
-
-//	private static int TEXTURE_SIZE = 1024;
-
 	private Kinect kinect;
 	private int kinectWidth;
 	private int kinectHeight;
@@ -44,19 +41,26 @@ public class MyKinect : MonoBehaviour
 	public Shader terrainMaterialShader;
 	public RenderTexture renderTexture;
 
-	private ushort[,] filterCollection;
-	private short [,] filterSquare;
-	private uint index_filterSquare;
+//	private ushort[,] filterCollection;
+//	private short [,] filterSquare;
+//	private uint index_filterSquare;
+//
+//	private ushort [] KinectSA  = new ushort  [640 * 480];
+//	private byte   [] KinectBA  = new byte    [640 * 480 * 2];
+//	private int counter = 0;
+//	private int mn = 99999;
+//	private int mx = 0;
+//
+//	private int badVal      = 0;
+//	private int startsample = 1;
+//	private int stopsample  = 1 + 50;
 
-	private ushort [] KinectSA  = new ushort  [640 * 480];
-	private byte   [] KinectBA  = new byte    [640 * 480 * 2];
-	private int counter = 0;
-	private int mn = 99999;
-	private int mx = 0;
+	public Camera MainCam;
 
-	private int badVal      = 0;
-	private int startsample = 1;
-	private int stopsample  = 1 + 50;
+	public float moveSpeed = 50.0f;
+	private float xMove = 1.0f;
+	private float zMove = 1.0f;
+	private float yMove = 1.0f;
 
 
 
@@ -65,9 +69,6 @@ public class MyKinect : MonoBehaviour
 	void Awake ()
 	{
 		Debug.Log ("Slowing overall framerate");
-		//Application.targetFrameRate = 1;
-		//QualitySettings.vSyncCount = 0;
-
 	}
 
 	// Use this for initialization
@@ -114,6 +115,10 @@ public class MyKinect : MonoBehaviour
 			terrain6Material.SetInt ("_Grid_x_Index", 2);
 			terrain6Material.SetInt ("_Grid_z_Index", 1);
 
+			// Set camera position
+			Camera.main.transform.localPosition = new Vector3 (100, 550, 0);
+			Camera.main.transform.localRotation = Quaternion.Euler (90, 0, 0);
+		
 		} else {
 			throw new Exception ("Could not initialise kinect as no devices were found.");
 		}
@@ -128,8 +133,18 @@ public class MyKinect : MonoBehaviour
 		// Process any pending events.
 		Kinect.ProcessEvents ();
 
-		Debug.Log ("max : " + mx);
-		Debug.Log ("min : " + mn);
+
+
+		// Dynamic Camera movement with arrow keys
+		xMove = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+
+		if (Input.GetKey (KeyCode.LeftShift)) {
+			yMove = Input.GetAxis ("Vertical") * moveSpeed * Time.deltaTime;
+		} else {
+			zMove = Input.GetAxis ("Vertical") * moveSpeed * Time.deltaTime;
+		}
+			
+		Camera.main.transform.Translate (xMove, zMove, yMove);
 
 
 	}
@@ -139,11 +154,6 @@ public class MyKinect : MonoBehaviour
 	{
 		// initialise empty color object
 		Color32[] colorsSM  = new Color32 [kinectWidth * kinectHeight];
-
-		for (int i = 0; i < e.Data.Data.Length; i++) {	
-			if (e.Data.Data[i] < mn) { mn = e.Data.Data [i]; }
-			if (e.Data.Data[i] > mx) { mx = e.Data.Data [i]; }
-		}//ENDFOR
 
 			// convert the byte array into a color32 texture and set as depth texture for the shader.
 			// loop through the ushort array and replace elements with average.
