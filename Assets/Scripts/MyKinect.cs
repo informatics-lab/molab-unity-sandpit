@@ -2,6 +2,9 @@
 using System;
 using System.IO;
 using freenect;
+using System.Collections;
+using UnityEngine.UI;
+
 
 public class MyKinect : MonoBehaviour
 {
@@ -12,12 +15,10 @@ public class MyKinect : MonoBehaviour
 	private int terrainWidth;
 	private int terrainHeight;
 
-//	private static ushort MAX_KINECT_VALUE = 1050;
-//	private static ushort MIN_KINECT_VALUE = 100;
-//	public static ushort MAX_KINECT_VALUE = 670;
-//	public static ushort MIN_KINECT_VALUE = 415;
 	public static ushort MAX_KINECT_VALUE = 610;
 	public static ushort MIN_KINECT_VALUE = 415;
+	public static ushort MIN_KINECT_VALUE_OFFSET = 50;
+
 
 	private static int ypxl = 480;
 	private static int xpxl = 640;
@@ -62,7 +63,8 @@ public class MyKinect : MonoBehaviour
 	private float zMove = 1.0f;
 	private float yMove = 1.0f;
 
-
+	public Slider RainSlider; 
+	private float RainSliderVal = 0;
 
 	//============//============//============//============//============//============//
 
@@ -78,12 +80,10 @@ public class MyKinect : MonoBehaviour
 			Debug.Log ("Initialising kinect");
 			kinect = new Kinect (0);
 			kinect.Open ();
-
 			kinect.DepthCamera.DataReceived += HandleKinectDepthCameraDataReceived;
-
 			kinect.DepthCamera.Start ();
-			kinect.LED.Color = LEDColor.Red;
 
+			kinect.LED.Color = LEDColor.Red;
 			kinectWidth = kinect.DepthCamera.Mode.Width;
 			kinectHeight = kinect.DepthCamera.Mode.Height;
 
@@ -94,14 +94,12 @@ public class MyKinect : MonoBehaviour
 			Debug.Log ("kinect mode paddingbitsperpixel " + kinect.DepthCamera.Mode.PaddingBitsPerPixel);
 
 			depthTexture = new Texture2D (kinectWidth, kinectHeight, TextureFormat.ARGB32, false);
-
 			terrain1Material = terrain1.GetComponent<Renderer>().material;
 			terrain2Material = terrain2.GetComponent<Renderer>().material;
 			terrain3Material = terrain3.GetComponent<Renderer>().material;
 			terrain4Material = terrain4.GetComponent<Renderer>().material;
 			terrain5Material = terrain5.GetComponent<Renderer>().material;
 			terrain6Material = terrain6.GetComponent<Renderer>().material;
-
 			terrain1Material.SetInt ("_Grid_x_Index", 0);
 			terrain1Material.SetInt ("_Grid_z_Index", 0);
 			terrain2Material.SetInt ("_Grid_x_Index", 1);
@@ -118,10 +116,21 @@ public class MyKinect : MonoBehaviour
 			// Set camera position
 			Camera.main.transform.localPosition = new Vector3 (100, 550, 0);
 			Camera.main.transform.localRotation = Quaternion.Euler (90, 0, 0);
+
+			// Set RainSlider
+			RainSlider.transform.localPosition = new Vector3 (-217, 158, 0);
+			RainSlider.maxValue = MAX_KINECT_VALUE;
+			RainSlider.minValue = MIN_KINECT_VALUE + MIN_KINECT_VALUE_OFFSET + 0;
+			//RainSlider.value = RainSlider.minValue;
+
+
+
+
 		
 		} else {
 			throw new Exception ("Could not initialise kinect as no devices were found.");
 		}
+
 	}
 
 	// Update is called once per frame
@@ -133,64 +142,60 @@ public class MyKinect : MonoBehaviour
 		// Process any pending events.
 		Kinect.ProcessEvents ();
 
-
-
 		// Dynamic Camera movement with arrow keys
 		xMove = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
-
-		if (Input.GetKey (KeyCode.LeftShift)) {
+			if (Input.GetKey (KeyCode.LeftShift)) {
 			yMove = Input.GetAxis ("Vertical") * moveSpeed * Time.deltaTime;
 		} else {
 			zMove = Input.GetAxis ("Vertical") * moveSpeed * Time.deltaTime;
-		}
-			
+		}	
 		Camera.main.transform.Translate (xMove, zMove, yMove);
-
 
 	}
 		
 	// Callback for kinect camera, called when depth data stream is received
 	private void HandleKinectDepthCameraDataReceived (object sender, BaseCamera. DataReceivedEventArgs e)
 	{
+
 		// initialise empty color object
 		Color32[] colorsSM  = new Color32 [kinectWidth * kinectHeight];
 
 			// convert the byte array into a color32 texture and set as depth texture for the shader.
 			// loop through the ushort array and replace elements with average.
-			for (int i = 0; i < colorsSM.Length; i++) {	
+		for (int i = 0; i < colorsSM.Length; i++) {	
 
-				ushort s = BitConverter.ToUInt16 (e.Data.Data, i * 2);	//value of pixel
+			ushort s = BitConverter.ToUInt16 (e.Data.Data, i * 2);	//value of pixel
+			ushort w = (ushort) ( -1 * RainSlider.value) ; // value used for height of water
 
-				// Reset the pixel if its value lies outside the bounds of MAX_KINECT_VALUE
-				// and MIN_KINECT_VALUE + something. 
-				// Any pixel returing the 2047 error value is set to MIN_KINECT_VALUE
-				// this unique value can then be picked up in the shader.
-				if (s > MAX_KINECT_VALUE && s != 2047) {s = MAX_KINECT_VALUE ;}
-				if (s <= MIN_KINECT_VALUE) {s = (ushort) ( (int) MIN_KINECT_VALUE + 50) ;}
+			// Reset the pixel if its value lies outside the bounds of MAX_KINECT_VALUE
+			// and MIN_KINECT_VALUE + something. 
+			// Any pixel returing the 2047 error value is set to MIN_KINECT_VALUE
+			// this unique value can then be picked up in the shader.
+			if (s > MAX_KINECT_VALUE && s != 2047) {s = MAX_KINECT_VALUE ;}
+			if (s <= MIN_KINECT_VALUE) {s = (ushort) ( (int) MIN_KINECT_VALUE + MIN_KINECT_VALUE_OFFSET) ;}
+			if (s < MIN_KINECT_VALUE + 50) {s = MIN_KINECT_VALUE;} 
 
-				if (s < MIN_KINECT_VALUE + 50) {s = MIN_KINECT_VALUE;} 
+			Color32 color = new Color32 ();	// Take the colour, scale it and put it into a colour array.
+			double ScalingFactor = 255.0 / (MAX_KINECT_VALUE - (MIN_KINECT_VALUE+1) );
+			color.r = (byte) ( (uint) Math.Ceiling ((s - MIN_KINECT_VALUE) * ScalingFactor) );
+			color.g = 0;
+			color.b = (byte) ( (uint) Math.Ceiling ((w - MIN_KINECT_VALUE) * ScalingFactor) );
+			color.a = 0;
 
-				Color32 color = new Color32 ();	// Take the colour, scale it and put it into a colour array.
-				double ScalingFactor = 255.0 / (MAX_KINECT_VALUE - MIN_KINECT_VALUE);
-				uint scaled = (uint) Math.Ceiling ((s - MIN_KINECT_VALUE) * ScalingFactor); 
-				color.a = 0;
-				color.b = 0;
-				color.g = 0;
-				color.r = (byte) (scaled);
-				colorsSM [i] = color;
+			colorsSM [i] = color;
 
-			} // ENDFOR
+		} // ENDFOR
 
-			depthTexture.SetPixels32 (colorsSM);
-			depthTexture.Apply();
+		depthTexture.SetPixels32 (colorsSM);
+		depthTexture.Apply();
 
-			terrain1Material.SetTexture ("_DepthTex", depthTexture);
-			terrain2Material.SetTexture ("_DepthTex", depthTexture);
-			terrain3Material.SetTexture ("_DepthTex", depthTexture);
-			terrain4Material.SetTexture ("_DepthTex", depthTexture);
-			terrain5Material.SetTexture ("_DepthTex", depthTexture);
-			terrain6Material.SetTexture ("_DepthTex", depthTexture);
-
+		terrain1Material.SetTexture ("_DepthTex", depthTexture);
+		terrain2Material.SetTexture ("_DepthTex", depthTexture);
+		terrain3Material.SetTexture ("_DepthTex", depthTexture);
+		terrain4Material.SetTexture ("_DepthTex", depthTexture);
+		terrain5Material.SetTexture ("_DepthTex", depthTexture);
+		terrain6Material.SetTexture ("_DepthTex", depthTexture);
+	
 	} // ENDFUNCTION
 
 
