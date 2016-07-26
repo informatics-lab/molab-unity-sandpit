@@ -46,12 +46,16 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Editor\CreatePlane.cs" />
+     <None Include="Assets\RiverWater\Shaders\RiverWater.shader" />
      <None Include="Assets\wtf.shader" />
      <None Include="Assets\Shaders\MyUnlitGridShader.shader" />
      <None Include="Assets\HeightMapTerrainShader.shader" />
      <None Include="Assets\Shaders\MyUnlitShader.shader" />
      <None Include="Assets\Shaders\MyShader.shader" />
      <None Include="Assets\Shaders\Heightmap.shader" />
+ <Reference Include="Assembly-UnityScript">
+ <HintPath>/Users/mike/Documents/molab-sandpit/molab-unity-sandpit/Library/ScriptAssemblies/Assembly-UnityScript.dll</HintPath>
+ </Reference>
  <Reference Include="UnityEngine.Networking">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
  </Reference>

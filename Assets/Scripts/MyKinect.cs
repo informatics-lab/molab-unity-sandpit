@@ -19,11 +19,11 @@ public class MyKinect : MonoBehaviour
 	public static ushort MIN_KINECT_VALUE = 415;
 	public static ushort MIN_KINECT_VALUE_OFFSET = 50;
 
+//	private static int ypxl = 480;
+//	private static int xpxl = 640;
 
-	private static int ypxl = 480;
-	private static int xpxl = 640;
-
-	public Texture2D depthTexture;
+	public Texture2D TerrainTexture;
+	public Texture2D WaterTexture;
 
 	public GameObject terrain1; //this is actually a 'Plane' object
 	public GameObject terrain2;
@@ -32,6 +32,8 @@ public class MyKinect : MonoBehaviour
 	public GameObject terrain5;
 	public GameObject terrain6;
 
+	public GameObject water;
+
 	public Material terrain1Material;
 	public Material terrain2Material;
 	public Material terrain3Material;
@@ -39,9 +41,13 @@ public class MyKinect : MonoBehaviour
 	public Material terrain5Material;
 	public Material terrain6Material;
 
-	public Shader terrainMaterialShader;
-	public RenderTexture renderTexture;
+	public Material waterMaterial;
 
+//	public Shader terrainMaterialShader;
+//	public RenderTexture renderTexture;
+
+	private Vector2 watermatrix;
+	public float flowspeed = 0.025F;
 //	private ushort[,] filterCollection;
 //	private short [,] filterSquare;
 //	private uint index_filterSquare;
@@ -64,7 +70,7 @@ public class MyKinect : MonoBehaviour
 	private float yMove = 1.0f;
 
 	public Slider RainSlider; 
-	private float RainSliderVal = 0;
+//	private float RainSliderVal = 0;
 
 	//============//============//============//============//============//============//
 
@@ -76,6 +82,23 @@ public class MyKinect : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+
+		// Set camera position
+		Camera.main.transform.localPosition = new Vector3 (100, 550, 0);
+		Camera.main.transform.localRotation = Quaternion.Euler (90, 0, 0);
+
+
+		// Set RainSlider
+		RainSlider.transform.localPosition = new Vector3 (-217, 158, 0);
+		RainSlider.maxValue = MAX_KINECT_VALUE;
+		RainSlider.minValue = MIN_KINECT_VALUE + MIN_KINECT_VALUE_OFFSET + 0;
+
+		// Water texture
+		WaterTexture = new Texture2D (kinectWidth, kinectHeight, TextureFormat.ARGB32, false);
+		watermatrix  = new Vector2(0,0);
+
+		//waterMaterial = water.GetComponent<Renderer>().material;
+
 		if (freenect.Kinect.DeviceCount == 1) {
 			Debug.Log ("Initialising kinect");
 			kinect = new Kinect (0);
@@ -93,7 +116,7 @@ public class MyKinect : MonoBehaviour
 			Debug.Log ("kinect mode databitsperpixel " + kinect.DepthCamera.Mode.DataBitsPerPixel);
 			Debug.Log ("kinect mode paddingbitsperpixel " + kinect.DepthCamera.Mode.PaddingBitsPerPixel);
 
-			depthTexture = new Texture2D (kinectWidth, kinectHeight, TextureFormat.ARGB32, false);
+			TerrainTexture = new Texture2D (kinectWidth, kinectHeight, TextureFormat.ARGB32, false);
 			terrain1Material = terrain1.GetComponent<Renderer>().material;
 			terrain2Material = terrain2.GetComponent<Renderer>().material;
 			terrain3Material = terrain3.GetComponent<Renderer>().material;
@@ -113,20 +136,6 @@ public class MyKinect : MonoBehaviour
 			terrain6Material.SetInt ("_Grid_x_Index", 2);
 			terrain6Material.SetInt ("_Grid_z_Index", 1);
 
-			// Set camera position
-			Camera.main.transform.localPosition = new Vector3 (100, 550, 0);
-			Camera.main.transform.localRotation = Quaternion.Euler (90, 0, 0);
-
-			// Set RainSlider
-			RainSlider.transform.localPosition = new Vector3 (-217, 158, 0);
-			RainSlider.maxValue = MAX_KINECT_VALUE;
-			RainSlider.minValue = MIN_KINECT_VALUE + MIN_KINECT_VALUE_OFFSET + 0;
-			//RainSlider.value = RainSlider.minValue;
-
-
-
-
-		
 		} else {
 			throw new Exception ("Could not initialise kinect as no devices were found.");
 		}
@@ -142,6 +151,7 @@ public class MyKinect : MonoBehaviour
 		// Process any pending events.
 		Kinect.ProcessEvents ();
 
+
 		// Dynamic Camera movement with arrow keys
 		xMove = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
 			if (Input.GetKey (KeyCode.LeftShift)) {
@@ -151,7 +161,14 @@ public class MyKinect : MonoBehaviour
 		}	
 		Camera.main.transform.Translate (xMove, zMove, yMove);
 
+
+		// Update water
+		watermatrix.x = watermatrix.x + (flowspeed / 1000);
+		watermatrix.y = watermatrix.y - (flowspeed / 1000);
+
 	}
+
+
 		
 	// Callback for kinect camera, called when depth data stream is received
 	private void HandleKinectDepthCameraDataReceived (object sender, BaseCamera. DataReceivedEventArgs e)
@@ -160,19 +177,17 @@ public class MyKinect : MonoBehaviour
 		// initialise empty color object
 		Color32[] colorsSM  = new Color32 [kinectWidth * kinectHeight];
 
-			// convert the byte array into a color32 texture and set as depth texture for the shader.
-			// loop through the ushort array and replace elements with average.
+		// convert the byte array into a color32 texture and set as depth texture for the shader.
+		// loop through the ushort array and replace elements with average.
 		for (int i = 0; i < colorsSM.Length; i++) {	
 
-			ushort s = BitConverter.ToUInt16 (e.Data.Data, i * 2);	//value of pixel
-			ushort w = (ushort) ( -1 * RainSlider.value) ; // value used for height of water
+			ushort s = BitConverter.ToUInt16 (e.Data.Data, i * 2);	// value of pixel
+			ushort w = (ushort) ( -1 * RainSlider.value) ;          // value used for height of water
 
-			// Reset the pixel if its value lies outside the bounds of MAX_KINECT_VALUE
-			// and MIN_KINECT_VALUE + something. 
-			// Any pixel returing the 2047 error value is set to MIN_KINECT_VALUE
-			// this unique value can then be picked up in the shader.
+			// Reset the pixel if its value lies outside the bounds of MAX_KINECT_VALUE and MIN_KINECT_VALUE + something. 
+			// Any pixel returing the 2047 error value is set to MIN_KINECT_VALUE this unique value can then be picked up in the shader.
 			if (s > MAX_KINECT_VALUE && s != 2047) {s = MAX_KINECT_VALUE ;}
-			if (s <= MIN_KINECT_VALUE) {s = (ushort) ( (int) MIN_KINECT_VALUE + MIN_KINECT_VALUE_OFFSET) ;}
+			if (s <= MIN_KINECT_VALUE) {s = (ushort) ( (int) MIN_KINECT_VALUE + MIN_KINECT_VALUE_OFFSET ) ;}
 			if (s < MIN_KINECT_VALUE + 50) {s = MIN_KINECT_VALUE;} 
 
 			Color32 color = new Color32 ();	// Take the colour, scale it and put it into a colour array.
@@ -186,16 +201,32 @@ public class MyKinect : MonoBehaviour
 
 		} // ENDFOR
 
-		depthTexture.SetPixels32 (colorsSM);
-		depthTexture.Apply();
+		TerrainTexture.SetPixels32 (colorsSM);
+		TerrainTexture.Apply();
+		WaterTexture.SetPixels32 (colorsSM);
+		WaterTexture.Apply();
 
-		terrain1Material.SetTexture ("_DepthTex", depthTexture);
-		terrain2Material.SetTexture ("_DepthTex", depthTexture);
-		terrain3Material.SetTexture ("_DepthTex", depthTexture);
-		terrain4Material.SetTexture ("_DepthTex", depthTexture);
-		terrain5Material.SetTexture ("_DepthTex", depthTexture);
-		terrain6Material.SetTexture ("_DepthTex", depthTexture);
-	
+
+
+
+
+
+		terrain1Material.SetTexture ("_TerrainTex", TerrainTexture);
+		terrain2Material.SetTexture ("_TerrainTex", TerrainTexture);
+		terrain3Material.SetTexture ("_TerrainTex", TerrainTexture);
+		terrain4Material.SetTexture ("_TerrainTex", TerrainTexture);
+		terrain5Material.SetTexture ("_TerrainTex", TerrainTexture);
+		terrain6Material.SetTexture ("_TerrainTex", TerrainTexture);
+
+//		waterMaterial.SetTextureOffset ("_Normals", watermatrix);
+//		waterMaterial.SetTextureOffset ("_ReflectTex", watermatrix);
+//		waterMaterial.SetTextureOffset ("_WaveMap", watermatrix);
+//		waterMaterial.SetTextureOffset ("_RefractTex", watermatrix);
+
+		water.transform.localPosition = new Vector3 (0, (RainSlider.value - 465), 0);
+
+
+
 	} // ENDFUNCTION
 
 

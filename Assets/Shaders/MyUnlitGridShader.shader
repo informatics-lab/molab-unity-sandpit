@@ -2,14 +2,17 @@
 {
 	Properties
 	{
-		_DepthTex ("Depth Map Texture (RGB565)", 2D) = "red" {}
-		_DepthTexWidth ("Depth Map Texture Width", Float) = 1.0
-		_DepthTexHeight ("Depth Map Texture Height", Float) = 1.0
-		_DepthMatrix ("Height Matrix",Vector) = (1.,1.,1.,1.)
+		_TerrainTex ("Terrain Map Texture (RGB565)", 2D) = "red" {}
+
+		_TerrainTexWidth ("Terrain Map Texture Width", Float) = 1.0
+		_TerrainTexHeight ("Terrain Map Texture Height", Float) = 1.0
+		_TerrainMatrix ("Height Matrix",Vector) = (1.,1.,1.,1.)
 
 		_Scale ("Size",Vector) = (1,1,1,1)
 
 		_ColorTex ("Color Map Texture (RGB)", 2D) = "white" {}
+		_WaterTex ("Color Map Texture (RGB)", 2D) = "white" {}
+
 
 		_MAX_KINECT_VALUE ("top of kinect range", int) = 1
 		_MIN_KINECT_VALUE ("bottom of kinect range", int) = 0
@@ -28,23 +31,20 @@
 		{
 			CGPROGRAM
 
-			// Use the method name 'vert' for the vertex shader
-    		#pragma vertex vert            
-    		// Use the method named 'frag' for the fragment shader 
-    		#pragma fragment frag
-
+    		#pragma vertex vert     		// Use the method name 'vert' for the vertex shader     
+    		#pragma fragment frag     		// Use the method named 'frag' for the fragment shader 
     		#pragma target 4.0
 
     		// Include some magic from unity
     		#include "UnityCG.cginc"
 
-    		sampler2D _DepthTex;
-    		float4 _DepthTex_ST;
-    		float _DepthTexWidth;
-    		float _DepthTexHeight;
+    		sampler2D _TerrainTex;
+    		float4 _TerrainTex_ST;
+    		float _TerrainTexWidth;
+    		float _TerrainTexHeight;
 
-    		float4 _DepthMatrix;
-    		float4 _DepthTex_TexelSize;
+    		float4 _TerrainMatrix;
+    		float4 _TerrainTex_TexelSize;
 			float4 _Scale;
 
     		sampler2D _ColorTex;
@@ -108,37 +108,31 @@
 					v.uv[1] = 0.5     + (v.uv[1] / 2);
 				}
 
-		        float4 depth  = tex2Dlod (_DepthTex, float4(v.uv, 0.0, 0.0)); 
-		        float4 height = float4 (1 - depth.r, 0, 0, 0);
+		        float4 depth    = tex2Dlod (_TerrainTex, float4(v.uv, 0.0, 0.0)); 
+		        float4 height   = float4 (1 - depth.r, 0, 0, 0);
 		        float4 sealevel = float4 (1 - depth.b, 0, 0, 0);
 
-
-
-				// if the blue channel value is greater than the red channel value then do the blue channel instead
-				if (depth.b < depth.r){
-					o.color    = float4 (0., 0., 1., 0.);
-					v.vertex.y = sealevel * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;
-				} else if (depth.r  <= 0) { 			// i.e. if the value sampled corresponds to the 2047 (transformed to a 0)
+		        // if the blue channel value is greater than the red channel value then do the blue channel instead
+//				if (depth.b < depth.r){
+//					o.color    = float4(0,0,1,0); //tex2Dlod(_WaterTex, sealevel);
+//					v.vertex.y = sealevel * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;
+//				} else 
+				if (depth.r  <= 0) { 			// i.e. if the value sampled corresponds to the 2047 (transformed to a 0)
    		        	o.color    = float4(0.73, 0.73, 0.35, 1.);
    		        } else {
    		           	v.vertex.y = height * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;// change the vertex height 
 					o.color = tex2Dlod(_ColorTex, height);  // sample the colorTexture (land sea colour scheme)
 				}
-
-
-   		        // magically transfers the 3d verteces to the 2d display
+				// magically transfers the 3d verteces to the 2d display
 		        o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 		        return o;
 		    }
 
 
-
 		    // The fragment shader - handles the color of vertex
 		    fixed4 frag (v2f i) : SV_Target { 
-		       //	i.color = float4 ( tex2D (_ColorTex, i.uv).rgb, 1.0);
 		       	return i.color;
 		    }
-
 
 		    ENDCG
 		}
