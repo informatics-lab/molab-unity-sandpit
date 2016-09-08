@@ -1,0 +1,15 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Shaders/MyUnlitGridShader.shader">
+    <Files>
+      <File FileName="Assets/Scripts/MyKinect.cs" Line="31" Column="2" />
+      <File FileName="Assets/Shaders/MyUnlitGridShader.shader" Line="117" Column="35" />
+      <File FileName="Assets/RiverWater/Scripts/RiverRefraction1.js" Line="12" Column="10" />
+      <File FileName="Assets/RiverWater/Shaders/RiverWater.shader" Line="73" Column="4" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
