@@ -10,7 +10,8 @@
 		_ReflectTex("Water", 2D) = "grey" {}
 
 		_Parallax ("Refraction Distort", Range (0.005, 0.08)) = 0.02
-		_WaveHeight ("Wave Height", Range (0.01, 0.08)) = 0.08
+		_WaveHeight ("Wave Height", Range (0.01, 00.08)) = 0.08
+		_WaveMag ("Wave Magnitude", Range (0.00, 10.00)) = 0
 		_FresnelColor("Alpha(for non-refractive water)", Color) = (0,0,0,1)
 	}
 	SubShader {
@@ -29,6 +30,7 @@
 		sampler2D _ReflectTex;
 		half _Parallax;
 		half _WaveHeight;
+		half _WaveMag;
 		half _Power;
 		half4 _FresnelColor;
 		
@@ -39,7 +41,10 @@
 			float2 uv_ReflectTex;
 			float4 screenPos;
 			float3 viewDir;
+			float4 vertex : POSITION; // position in model space
+
 		};
+
 
 		void surf (Input IN, inout SurfaceOutput o) {
 			//relief mapping

@@ -113,14 +113,14 @@
 		        float4 sealevel = float4 (1 - depth.b, 0, 0, 0);
 
 		        // if the blue channel value is greater than the red channel value then do the blue channel instead
-//				if (depth.b < depth.r){
-//					o.color    = float4(0,0,1,0); //tex2Dlod(_WaterTex, sealevel);
-//					v.vertex.y = sealevel * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;
-//				} else 
-				if (depth.r  <= 0) { 			// i.e. if the value sampled corresponds to the 2047 (transformed to a 0)
+				if (depth.b < depth.r){
+					o.color    = float4(0.1,0.4,1,0); //tex2Dlod(_WaterTex, sealevel);
+					v.vertex.y = sealevel * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;
+				} else 
+				if (depth.r  <= 0) { // i.e. if the value sampled corresponds to the 2047 (transformed to a 0)
    		        	o.color    = float4(0.73, 0.73, 0.35, 1.);
    		        } else {
-   		           	v.vertex.y = height * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170;// change the vertex height 
+   		           	v.vertex.y = height * (_MAX_KINECT_VALUE - _MIN_KINECT_VALUE) * 170; // change the vertex height 
 					o.color = tex2Dlod(_ColorTex, height);  // sample the colorTexture (land sea colour scheme)
 				}
 				// magically transfers the 3d verteces to the 2d display
